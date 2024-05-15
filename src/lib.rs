@@ -52,7 +52,7 @@ use std::string::ToString;
 /// // `a` is smaller (i.e. older) than `b`.
 /// assert_eq!(a.cmp(&b), Ordering::Less)
 /// ```
-#[derive(PartialEq, Eq, Debug)]
+#[derive(PartialEq, Eq, Debug, Clone)]
 pub struct Version(String);
 
 impl Version {
