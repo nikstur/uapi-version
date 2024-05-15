@@ -6,6 +6,18 @@
 //!
 //! # Examples
 //!
+//! You can compare two versions:
+//!
+//! ```
+//! use std::cmp::Ordering;
+//!
+//! use uapi_version::Version;
+//!
+//! let a = Version::from("225.1");
+//! let b = Version::from("2");
+//! assert_eq!(a.cmp(&b), Ordering::Greater)
+//! ```
+//!
 //! [`Version`] implements [`std::cmp::Ord`] and thus can be used to order a list of versions.
 //!
 //! ```
