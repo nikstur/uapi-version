@@ -33,7 +33,6 @@
 //! ```
 
 use std::cmp::Ordering;
-use std::collections::HashSet;
 use std::string::ToString;
 
 /// The `Version` type.
@@ -232,10 +231,10 @@ fn compare_special_char(char: char, left: Option<char>, right: Option<char>) -> 
 }
 
 fn is_valid_version_char(c: char) -> bool {
-    let allowed_chars: HashSet<&char> = ['~', '-', '^', '.'].iter().collect();
-    c.is_ascii_alphanumeric() || allowed_chars.contains(&c)
+    c.is_ascii_alphanumeric() || matches!(c, '~' | '-' | '^' | '.')
 }
 
+// Test cases from systemd's src/test/test-string-util.c
 #[cfg(test)]
 mod tests {
     use super::*;
