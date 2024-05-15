@@ -15,6 +15,7 @@
 //!
 //! let a = Version::from("225.1");
 //! let b = Version::from("2");
+//!
 //! assert_eq!(a.cmp(&b), Ordering::Greater)
 //! ```
 //!
@@ -124,7 +125,6 @@ impl Ord for Version {
 ///
 /// use uapi_version::strverscmp;
 ///
-/// // `a` is smaller (i.e. older) than `b`.
 /// assert_eq!(strverscmp("1.0.0", "2.0.0"), Ordering::Less)
 /// ```
 #[must_use]
