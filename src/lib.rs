@@ -45,7 +45,7 @@
 //! ```
 
 use std::cmp::Ordering;
-use std::string::ToString;
+use std::fmt;
 
 /// The `Version` type.
 ///
@@ -80,9 +80,9 @@ impl From<&str> for Version {
     }
 }
 
-impl ToString for Version {
-    fn to_string(&self) -> String {
-        self.as_str().into()
+impl fmt::Display for Version {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.0)
     }
 }
 
