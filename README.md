@@ -53,7 +53,7 @@ fn main() {
 
 ```
 
-You can also compare to version strings directly:
+You can also compare version strings directly:
 
 ```rust
 use std::cmp::Ordering;
