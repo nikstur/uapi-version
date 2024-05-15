@@ -72,11 +72,28 @@ impl Version {
     pub fn as_str(&self) -> &str {
         &self.0
     }
+
+    #[must_use]
+    pub fn into_string(self) -> String {
+        self.0
+    }
 }
 
 impl From<&str> for Version {
     fn from(s: &str) -> Self {
-        Self(String::from(s))
+        Self(s.into())
+    }
+}
+
+impl From<String> for Version {
+    fn from(s: String) -> Self {
+        Self(s)
+    }
+}
+
+impl From<&String> for Version {
+    fn from(s: &String) -> Self {
+        Self(s.into())
     }
 }
 
@@ -270,6 +287,13 @@ mod tests {
         for (a, b) in versions {
             assert_smaller(a, b);
         }
+    }
+
+    #[test]
+    fn constructing() {
+        let _ = Version::from(String::from("a"));
+        let _ = Version::from(&String::from("a"));
+        let _ = Version::from("a");
     }
 
     #[test]
