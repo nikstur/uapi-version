@@ -4,7 +4,8 @@ Compare versions according to the [UAPI Version Format
 Specification](https://uapi-group.org/specifications/specs/version_format_specification/).
 
 This library is written purely in Rust and does not rely on any third party
-dependencies.
+dependencies. It is `#![no_std]` and can thus, for example, also be used for
+UEFI development.
 
 Uses the same test suite that systemd uses to test their
 `strverscmp_improved()` function.

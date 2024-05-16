@@ -2,7 +2,8 @@
 //! Specification](https://uapi-group.org/specifications/specs/version_format_specification/).
 //!
 //! This implementation is written purely in Rust and does not rely on any third party
-//! dependencies. Most notably, it doesn't link to `libsystemd`.
+//! dependencies. Most notably, it doesn't link to `libsystemd`. It is `#![no_std]` and thus can,
+//! for example, also be used for UEFI development.
 //!
 //! # Examples
 //!
