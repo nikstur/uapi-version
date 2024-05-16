@@ -44,9 +44,13 @@
 //!
 //! assert_eq!(strverscmp("124", "123"), Ordering::Greater)
 //! ```
+#![no_std]
 
-use std::cmp::Ordering;
-use std::fmt;
+extern crate alloc;
+
+use alloc::fmt;
+use alloc::string::String;
+use core::cmp::Ordering;
 
 /// The `Version` type.
 ///
