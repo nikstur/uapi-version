@@ -50,7 +50,6 @@ fn main() {
 
     assert_eq!(versions, [ "abc-5", "1.0.0~rc1", "5.2" ].map(Version::from))
 }
-
 ```
 
 You can also compare version strings directly:
