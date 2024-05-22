@@ -133,6 +133,7 @@ impl Ord for Version {
 /// assert_eq!(strverscmp("1.0.0", "2.0.0"), Ordering::Less)
 /// ```
 #[must_use]
+#[allow(clippy::too_many_lines)]
 pub fn strverscmp(a: &str, b: &str) -> Ordering {
     let mut left_iter = a.chars().peekable();
     let mut right_iter = b.chars().peekable();
@@ -188,12 +189,24 @@ pub fn strverscmp(a: &str, b: &str) -> Ordering {
 
         // Step 7: Handle numerical prefix
         if left.is_some_and(|c| c.is_ascii_digit()) || right.is_some_and(|c| c.is_ascii_digit()) {
+            // Skip leading '0's
+            while left.is_some_and(|c| c == '0') {
+                if !left_iter.peek().is_some_and(|c| c == &'0') {
+                    break;
+                }
+                left = left_iter.next();
+            }
+            while right.is_some_and(|c| c == '0') {
+                if !right_iter.peek().is_some_and(|c| c == &'0') {
+                    break;
+                }
+                right = right_iter.next();
+            }
+
             let mut left_digit_prefix = String::new();
             while left.is_some_and(|c| c.is_ascii_digit()) {
                 if let Some(char) = left {
-                    if char != '0' {
-                        left_digit_prefix.push(char);
-                    }
+                    left_digit_prefix.push(char);
                 }
                 if !left_iter.peek().is_some_and(char::is_ascii_digit) {
                     break;
@@ -204,9 +217,7 @@ pub fn strverscmp(a: &str, b: &str) -> Ordering {
             let mut right_digit_prefix = String::new();
             while right.is_some_and(|c| c.is_ascii_digit()) {
                 if let Some(char) = right {
-                    if char != '0' {
-                        right_digit_prefix.push(char);
-                    }
+                    right_digit_prefix.push(char);
                 }
                 if !right_iter.peek().is_some_and(char::is_ascii_digit) {
                     break;
