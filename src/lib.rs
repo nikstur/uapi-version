@@ -188,18 +188,12 @@ pub fn strverscmp(a: &str, b: &str) -> Ordering {
 
         // Step 7: Handle numerical prefix
         if left.is_some_and(|c| c.is_ascii_digit()) || right.is_some_and(|c| c.is_ascii_digit()) {
-            // Skip leading '0's
-            while left.is_some_and(|c| c == '0') {
-                left = left_iter.next();
-            }
-            while right.is_some_and(|c| c == '0') {
-                right = right_iter.next();
-            }
-
             let mut left_digit_prefix = String::new();
             while left.is_some_and(|c| c.is_ascii_digit()) {
                 if let Some(char) = left {
-                    left_digit_prefix.push(char);
+                    if char != '0' {
+                        left_digit_prefix.push(char);
+                    }
                 }
                 if !left_iter.peek().is_some_and(char::is_ascii_digit) {
                     break;
@@ -210,7 +204,9 @@ pub fn strverscmp(a: &str, b: &str) -> Ordering {
             let mut right_digit_prefix = String::new();
             while right.is_some_and(|c| c.is_ascii_digit()) {
                 if let Some(char) = right {
-                    right_digit_prefix.push(char);
+                    if char != '0' {
+                        right_digit_prefix.push(char);
+                    }
                 }
                 if !right_iter.peek().is_some_and(char::is_ascii_digit) {
                     break;
