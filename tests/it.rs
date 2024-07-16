@@ -1,4 +1,4 @@
-//! Test cases from systemd's src/test/test-string-util.c
+//! Most test cases come from systemd's src/test/test-string-util.c
 
 use std::cmp::Ordering;
 
@@ -6,6 +6,9 @@ use uapi_version::{strverscmp, Version};
 
 fn assert_ordering(a: &str, b: &str, expected: Ordering) {
     let ordering = strverscmp(a, b);
+    if ordering != expected {
+        println!("Wrong ordering: {a}, {b}");
+    }
     assert_eq!(ordering, expected);
 }
 
@@ -64,6 +67,31 @@ fn order() {
         "123.1-1",
         "123a-1",
         "124",
+    ];
+
+    for (i, first) in versions.iter().enumerate() {
+        for next in versions.iter().skip(i + 1) {
+            assert_smaller(first, next);
+        }
+    }
+}
+
+/// Test data comes from systemd's `strverscmp_improved` docstring in src/fundamental/string-util-fundamental.c
+#[test]
+fn order_strverscmp_improved_doc() {
+    let versions = [
+        "122.1",
+        "123~rc1-1",
+        "123",
+        "123-a",
+        "123-a.1",
+        "123-1",
+        "123-1.1",
+        "123^post1",
+        "123.a-1",
+        "123.1-1",
+        "123a-1",
+        "124-1",
     ];
 
     for (i, first) in versions.iter().enumerate() {
@@ -182,5 +210,34 @@ fn zeros() {
         ("0.0.1", "0.0.10"),
         ("0.1.2", "0.10.2"),
         ("0.0.9", "1.0.0"),
+    ]);
+}
+
+/// Test data comes from the examples from the UAPI version spec.
+#[test]
+fn uapi_spec_examples() {
+    assert_ordering_list(&[
+        ("11", "11", Ordering::Equal),
+        ("systemd-123", "systemd-123", Ordering::Equal),
+        ("bar-123", "foo-123", Ordering::Less),
+        ("123a", "123", Ordering::Greater),
+        ("123.a", "123", Ordering::Greater),
+        ("123.a", "123.b", Ordering::Less),
+        ("123a", "123.a", Ordering::Greater),
+        ("11α", "11β", Ordering::Equal),
+        ("A", "a", Ordering::Less),
+        ("", "0", Ordering::Less),
+        ("0.", "0", Ordering::Greater),
+        ("0.0", "0", Ordering::Greater),
+        ("0", "~", Ordering::Greater),
+        ("", "~", Ordering::Greater),
+        ("1_", "1", Ordering::Equal),
+        ("_1", "1", Ordering::Equal),
+        ("1_", "1.2", Ordering::Less),
+        ("1_2_3", "1.3.3", Ordering::Greater),
+        ("1+", "1", Ordering::Equal),
+        ("+1", "1", Ordering::Equal),
+        ("1+", "1.2", Ordering::Less),
+        ("1+2+3", "1.3.3", Ordering::Greater),
     ]);
 }
