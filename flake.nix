@@ -61,12 +61,8 @@
 
           settings = {
             hooks = {
-              nixpkgs-fmt.enable = true;
-              typos.enable = true;
-              statix = {
-                enable = true;
-                settings.ignore = [ "sources.nix" ];
-              };
+              nixfmt.enable = true;
+              deadnix.enable = true;
             };
           };
         };
