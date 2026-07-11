@@ -5,93 +5,94 @@
 
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-    systems.url = "github:nix-systems/default";
-
-    flake-utils = {
-      url = "github:numtide/flake-utils";
-      inputs.systems.follows = "systems";
-    };
-
-    flake-parts = {
-      url = "github:hercules-ci/flake-parts";
-      inputs.nixpkgs-lib.follows = "nixpkgs";
-    };
-
-    pre-commit-hooks-nix = {
+    pre-commit = {
       url = "github:cachix/pre-commit-hooks.nix";
       inputs = {
         nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
       };
     };
 
   };
 
-  outputs = inputs@{ self, flake-parts, systems, ... }: flake-parts.lib.mkFlake { inherit inputs; } {
-    systems = import systems;
+  outputs =
+    inputs@{
+      self,
+      nixpkgs,
+      ...
+    }:
+    let
+      eachSystem = nixpkgs.lib.genAttrs [
+        "aarch64-darwin"
+        "aarch64-linux"
+        "x86_64-darwin"
+        "x86_64-linux"
+      ];
+    in
 
-    imports = [
-      inputs.pre-commit-hooks-nix.flakeModule
-    ];
+    {
+      packages = eachSystem (system: {
+        uapiVersion = nixpkgs.legacyPackages.${system}.callPackage ./nix/build.nix { };
+        default = self.packages.${system}.uapiVersion;
+      });
 
-    perSystem = { config, system, pkgs, lib, ... }:
-      let
-        uapiVersion = pkgs.callPackage ./nix/build.nix { };
-      in
-      {
-
-        packages = {
-          # This is mostly here for development
-          inherit uapiVersion;
-          default = uapiVersion;
-        };
-
-        checks = {
-          clippy = uapiVersion.overrideAttrs (_: previousAttrs: {
-            nativeCheckInputs = (previousAttrs.nativeCheckInputs or [ ]) ++ [ pkgs.clippy ];
-            checkPhase = "cargo clippy";
-          });
-          rustfmt = uapiVersion.overrideAttrs (_: previousAttrs: {
-            nativeCheckInputs = (previousAttrs.nativeCheckInputs or [ ]) ++ [ pkgs.rustfmt ];
-            checkPhase = "cargo fmt --check";
-          });
-        };
-
-        pre-commit = {
-          check.enable = true;
-
-          settings = {
+      checks = eachSystem (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        {
+          clippy = self.packages.${system}.uapiVersion.overrideAttrs (
+            _: previousAttrs: {
+              pname = "${previousAttrs.pname}-clippy";
+              nativeCheckInputs = (previousAttrs.nativeCheckInputs or [ ]) ++ [ pkgs.clippy ];
+              checkPhase = "cargo clippy";
+            }
+          );
+          rustfmt = self.packages.${system}.uapiVersion.overrideAttrs (
+            _: previousAttrs: {
+              pname = "${previousAttrs.pname}-rustfmt";
+              nativeCheckInputs = (previousAttrs.nativeCheckInputs or [ ]) ++ [ pkgs.rustfmt ];
+              checkPhase = "cargo fmt --check";
+            }
+          );
+          pre-commit = inputs.pre-commit.lib.${system}.run {
+            src = ./.;
             hooks = {
-              nixpkgs-fmt.enable = true;
-              typos.enable = true;
-              statix = {
-                enable = true;
-                settings.ignore = [ "sources.nix" ];
-              };
+              nixfmt.enable = true;
+              deadnix.enable = true;
             };
           };
-        };
+        }
+      );
 
-        devShells.default = pkgs.mkShell {
-          shellHook = ''
-            ${config.pre-commit.installationScript}
-          '';
+      devShells = eachSystem (
+        system:
+        let
+          pkgs = nixpkgs.legacyPackages.${system};
+        in
+        {
+          default = pkgs.mkShell {
+            shellHook = ''
+              ${self.checks.${system}.pre-commit.shellHook}
+            '';
 
-          packages = [
-            pkgs.clippy
-            pkgs.rustfmt
-            pkgs.cargo-machete
-            pkgs.cargo-edit
-            pkgs.cargo-bloat
-            pkgs.cargo-deny
-            pkgs.cargo-cyclonedx
-          ];
+            packages = [
+              pkgs.nixfmt
+              pkgs.clippy
+              pkgs.rustfmt
+              pkgs.cargo-machete
+              pkgs.cargo-edit
+              pkgs.cargo-bloat
+              pkgs.cargo-deny
+              pkgs.cargo-cyclonedx
+            ];
 
-          inputsFrom = [ uapiVersion ];
+            inputsFrom = [ self.packages.${system}.uapiVersion ];
 
-          RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
-        };
+            RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
+          };
+        }
+      );
 
-      };
-  };
+    };
 }

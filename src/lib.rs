@@ -191,13 +191,13 @@ pub fn strverscmp(a: &str, b: &str) -> Ordering {
         if left.is_some_and(|c| c.is_ascii_digit()) || right.is_some_and(|c| c.is_ascii_digit()) {
             // Skip leading '0's
             while left.is_some_and(|c| c == '0') {
-                if !left_iter.peek().is_some_and(|c| c == &'0') {
+                if left_iter.peek().is_none_or(|c| c != &'0') {
                     break;
                 }
                 left = left_iter.next();
             }
             while right.is_some_and(|c| c == '0') {
-                if !right_iter.peek().is_some_and(|c| c == &'0') {
+                if right_iter.peek().is_none_or(|c| c != &'0') {
                     break;
                 }
                 right = right_iter.next();
@@ -266,8 +266,8 @@ pub fn strverscmp(a: &str, b: &str) -> Ordering {
 }
 
 fn compare_special_char(char: char, left: Option<char>, right: Option<char>) -> Ordering {
-    let left_bool = !left.is_some_and(|c| c == char);
-    let right_bool = !right.is_some_and(|c| c == char);
+    let left_bool = left.is_none_or(|c| c != char);
+    let right_bool = right.is_none_or(|c| c != char);
     left_bool.cmp(&right_bool)
 }
 

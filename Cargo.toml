@@ -8,7 +8,7 @@ homepage = "https://github.com/nikstur/uapi-version"
 repository = "https://github.com/nikstur/uapi-version"
 readme = "README.md"
 license = "MIT"
-edition = "2021"
+edition = "2024"
 
 [lints.rust]
 unsafe_code = "forbid"

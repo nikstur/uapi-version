@@ -1,5 +1,6 @@
-{ lib
-, rustPlatform
+{
+  lib,
+  rustPlatform,
 }:
 
 let
@@ -9,7 +10,11 @@ rustPlatform.buildRustPackage {
   pname = cargoToml.package.name;
   inherit (cargoToml.package) version;
 
-  src = lib.sourceFilesBySuffices ./.. [ ".rs" ".toml" ".lock" ];
+  src = lib.sourceFilesBySuffices ./.. [
+    ".rs"
+    ".toml"
+    ".lock"
+  ];
 
   cargoLock = {
     lockFile = ../Cargo.lock;
