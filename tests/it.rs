@@ -2,7 +2,7 @@
 
 use std::cmp::Ordering;
 
-use uapi_version::{strverscmp, Version};
+use uapi_version::{Version, strverscmp};
 
 fn assert_ordering(a: &str, b: &str, expected: Ordering) {
     let ordering = strverscmp(a, b);
