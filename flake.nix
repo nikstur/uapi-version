@@ -26,67 +26,85 @@
 
   };
 
-  outputs = inputs@{ self, flake-parts, systems, ... }: flake-parts.lib.mkFlake { inherit inputs; } {
-    systems = import systems;
+  outputs =
+    inputs@{
+      self,
+      flake-parts,
+      systems,
+      ...
+    }:
+    flake-parts.lib.mkFlake { inherit inputs; } {
+      systems = import systems;
 
-    imports = [
-      inputs.pre-commit-hooks-nix.flakeModule
-    ];
+      imports = [
+        inputs.pre-commit-hooks-nix.flakeModule
+      ];
 
-    perSystem = { config, system, pkgs, lib, ... }:
-      let
-        uapiVersion = pkgs.callPackage ./nix/build.nix { };
-      in
-      {
+      perSystem =
+        {
+          config,
+          system,
+          pkgs,
+          lib,
+          ...
+        }:
+        let
+          uapiVersion = pkgs.callPackage ./nix/build.nix { };
+        in
+        {
 
-        packages = {
-          # This is mostly here for development
-          inherit uapiVersion;
-          default = uapiVersion;
-        };
+          packages = {
+            # This is mostly here for development
+            inherit uapiVersion;
+            default = uapiVersion;
+          };
 
-        checks = {
-          clippy = uapiVersion.overrideAttrs (_: previousAttrs: {
-            nativeCheckInputs = (previousAttrs.nativeCheckInputs or [ ]) ++ [ pkgs.clippy ];
-            checkPhase = "cargo clippy";
-          });
-          rustfmt = uapiVersion.overrideAttrs (_: previousAttrs: {
-            nativeCheckInputs = (previousAttrs.nativeCheckInputs or [ ]) ++ [ pkgs.rustfmt ];
-            checkPhase = "cargo fmt --check";
-          });
-        };
+          checks = {
+            clippy = uapiVersion.overrideAttrs (
+              _: previousAttrs: {
+                nativeCheckInputs = (previousAttrs.nativeCheckInputs or [ ]) ++ [ pkgs.clippy ];
+                checkPhase = "cargo clippy";
+              }
+            );
+            rustfmt = uapiVersion.overrideAttrs (
+              _: previousAttrs: {
+                nativeCheckInputs = (previousAttrs.nativeCheckInputs or [ ]) ++ [ pkgs.rustfmt ];
+                checkPhase = "cargo fmt --check";
+              }
+            );
+          };
 
-        pre-commit = {
-          check.enable = true;
+          pre-commit = {
+            check.enable = true;
 
-          settings = {
-            hooks = {
-              nixfmt.enable = true;
-              deadnix.enable = true;
+            settings = {
+              hooks = {
+                nixfmt.enable = true;
+                deadnix.enable = true;
+              };
             };
           };
+
+          devShells.default = pkgs.mkShell {
+            shellHook = ''
+              ${config.pre-commit.shellHook}
+            '';
+
+            packages = [
+              pkgs.clippy
+              pkgs.rustfmt
+              pkgs.cargo-machete
+              pkgs.cargo-edit
+              pkgs.cargo-bloat
+              pkgs.cargo-deny
+              pkgs.cargo-cyclonedx
+            ];
+
+            inputsFrom = [ uapiVersion ];
+
+            RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
+          };
+
         };
-
-        devShells.default = pkgs.mkShell {
-          shellHook = ''
-            ${config.pre-commit.shellHook}
-          '';
-
-          packages = [
-            pkgs.clippy
-            pkgs.rustfmt
-            pkgs.cargo-machete
-            pkgs.cargo-edit
-            pkgs.cargo-bloat
-            pkgs.cargo-deny
-            pkgs.cargo-cyclonedx
-          ];
-
-          inputsFrom = [ uapiVersion ];
-
-          RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
-        };
-
-      };
-  };
+    };
 }
