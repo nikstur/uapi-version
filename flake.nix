@@ -28,7 +28,6 @@
 
   outputs =
     inputs@{
-      self,
       flake-parts,
       systems,
       ...
@@ -43,9 +42,7 @@
       perSystem =
         {
           config,
-          system,
           pkgs,
-          lib,
           ...
         }:
         let
