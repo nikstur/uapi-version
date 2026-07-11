@@ -21,7 +21,6 @@
       url = "github:cachix/pre-commit-hooks.nix";
       inputs = {
         nixpkgs.follows = "nixpkgs";
-        flake-utils.follows = "flake-utils";
       };
     };
 
@@ -74,7 +73,7 @@
 
         devShells.default = pkgs.mkShell {
           shellHook = ''
-            ${config.pre-commit.installationScript}
+            ${config.pre-commit.shellHook}
           '';
 
           packages = [
