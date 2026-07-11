@@ -43,12 +43,14 @@
         {
           clippy = self.packages.${system}.uapiVersion.overrideAttrs (
             _: previousAttrs: {
+              pname = "${previousAttrs.pname}-clippy";
               nativeCheckInputs = (previousAttrs.nativeCheckInputs or [ ]) ++ [ pkgs.clippy ];
               checkPhase = "cargo clippy";
             }
           );
           rustfmt = self.packages.${system}.uapiVersion.overrideAttrs (
             _: previousAttrs: {
+              pname = "${previousAttrs.pname}-rustfmt";
               nativeCheckInputs = (previousAttrs.nativeCheckInputs or [ ]) ++ [ pkgs.rustfmt ];
               checkPhase = "cargo fmt --check";
             }
